@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Cinzel:wght@400;700&family=Pacifico&family=Patrick+Hand&family=Playfair+Display:ital,wght=0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght=300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght=700&family=Cinzel:wght=400;700&family=Pacifico&family=Patrick+Hand&family=Playfair+Display:ital,wght=0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght=300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -533,25 +533,57 @@
 
         function resizeCanvas() {
             if (!canvas) return;
+            const oldWidth = canvas.width || 0;
+            const oldHeight = canvas.height || 0;
+            
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            
             if (youOrb && meOrb && !isFusing) {
-                youOrb.y = canvas.height / 2;
-                meOrb.y = canvas.height / 2;
+                if (oldWidth > 0 && oldHeight > 0) {
+                    const pctXYou = youOrb.x / oldWidth;
+                    const pctYYou = youOrb.y / oldHeight;
+                    const pctXMe = meOrb.x / oldWidth;
+                    const pctYMe = meOrb.y / oldHeight;
+                    
+                    youOrb.x = canvas.width * pctXYou;
+                    youOrb.y = canvas.height * pctYYou;
+                    youOrb.targetX = canvas.width * pctXYou;
+                    youOrb.targetY = canvas.height * pctYYou;
+                    
+                    meOrb.x = canvas.width * pctXMe;
+                    meOrb.y = canvas.height * pctYMe;
+                    meOrb.targetX = canvas.width * pctXMe;
+                    meOrb.targetY = canvas.height * pctYMe;
+                } else {
+                    const centerY = canvas.height / 2;
+                    youOrb.y = centerY;
+                    youOrb.targetY = centerY;
+                    meOrb.y = centerY;
+                    meOrb.targetY = centerY;
+                }
             }
         }
 
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
             if (e.touches && e.touches.length > 0) {
-                return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
             }
-            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            return { x: clientX - rect.left, y: clientY - rect.top };
         }
 
         function handleStart(e) {
             if (isFusing) return;
-            if (e.type === 'touchstart') e.preventDefault();
+            if (e.type === 'touchstart' && e.cancelable) e.preventDefault();
             const pos = getPos(e);
             if (Math.hypot(pos.x - youOrb.x, pos.y - youOrb.y) < 65) dragTarget = 'you';
             else if (Math.hypot(pos.x - meOrb.x, pos.y - meOrb.y) < 65) dragTarget = 'me';
@@ -559,7 +591,7 @@
 
         function handleMove(e) {
             if (!dragTarget || isFusing) return;
-            if (e.type === 'touchmove') e.preventDefault();
+            if (e.type === 'touchmove' && e.cancelable) e.preventDefault();
             const pos = getPos(e);
             const margin = 30;
             const bX = Math.max(margin, Math.min(canvas.width - margin, pos.x));
