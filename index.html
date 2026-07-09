@@ -495,6 +495,7 @@
         let youOrb, meOrb;
         let starfield = [], meTrail = [], heartParticles = [], explosionParticles = [];
         let isFusing = false, fuseProgress = 0, dragTarget = null;
+        let listenersAttached = false;
 
         function runStage3() {
             stage3.classList.remove('hidden');
@@ -504,7 +505,24 @@
             canvas = document.getElementById('galaxy-canvas');
             ctx = canvas.getContext('2d');
             resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+
+            // Robust single attachment of dynamic mobile dragging handlers to prevent memory stacking
+            if (!listenersAttached) {
+                window.addEventListener('resize', resizeCanvas);
+                
+                // Track start context directly on canvas
+                canvas.addEventListener('mousedown', handleStart);
+                canvas.addEventListener('touchstart', handleStart, { passive: false });
+                
+                // Track move/end globally on window so bounds, edge pull, or fast finger releases never lose tracking
+                window.addEventListener('mousemove', handleMove, { passive: false });
+                window.addEventListener('mouseup', handleEnd);
+                window.addEventListener('touchmove', handleMove, { passive: false });
+                window.addEventListener('touchend', handleEnd, { passive: false });
+                window.addEventListener('touchcancel', handleEnd, { passive: false });
+                
+                listenersAttached = true;
+            }
 
             // Populate Stars background
             starfield = [];
@@ -522,13 +540,6 @@
             const centerY = canvas.height / 2;
             youOrb = { x: canvas.width * 0.28, y: centerY, targetX: canvas.width * 0.28, targetY: centerY, radius: 28, color: '#ff007f', glowColor: 'rgba(255, 0, 127, 0.85)', label: 'YOU' };
             meOrb = { x: canvas.width * 0.72, y: centerY, targetX: canvas.width * 0.72, targetY: centerY, radius: 28, color: '#ff3333', glowColor: 'rgba(255, 51, 51, 0.85)', label: 'ME' };
-
-            canvas.addEventListener('mousedown', handleStart);
-            canvas.addEventListener('mousemove', handleMove);
-            canvas.addEventListener('mouseup', handleEnd);
-            canvas.addEventListener('touchstart', handleStart, { passive: false });
-            canvas.addEventListener('touchmove', handleMove, { passive: false });
-            canvas.addEventListener('touchend', handleEnd, { passive: false });
 
             requestAnimationFrame(gameLoop);
         }
@@ -588,8 +599,10 @@
             // Prevent simulated mousedown after touchstart to prevent coordinate lag, and lock mobile panning entirely
             if (e.type === 'touchstart' && e.cancelable) e.preventDefault();
             const pos = getPos(e);
-            if (Math.hypot(pos.x - youOrb.x, pos.y - youOrb.y) < 65) dragTarget = 'you';
-            else if (Math.hypot(pos.x - meOrb.x, pos.y - meOrb.y) < 65) dragTarget = 'me';
+            const isTouch = e.type.startsWith('touch');
+            const threshold = isTouch ? 90 : 65; // Much wider hit area for fingers to ensure high mobile touch responsiveness
+            if (Math.hypot(pos.x - youOrb.x, pos.y - youOrb.y) < threshold) dragTarget = 'you';
+            else if (Math.hypot(pos.x - meOrb.x, pos.y - meOrb.y) < threshold) dragTarget = 'me';
         }
 
         function handleMove(e) {
@@ -604,7 +617,13 @@
             else if (dragTarget === 'me') { meOrb.targetX = bX; meOrb.targetY = bY; }
         }
 
-        function handleEnd() { dragTarget = null; }
+        function handleEnd(e) { 
+            if (e && e.touches && e.touches.length > 0) {
+                // Safeguard drag target if secondary touches (or palm side gestures) are still active on screen
+                return;
+            }
+            dragTarget = null; 
+        }
 
         function gameLoop() {
             if (!canvas) return;
