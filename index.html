@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Two Souls. One Universe.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,13 +13,14 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
-        body {
+        html, body {
             background-color: #020205;
             color: #ffffff;
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none; /* Block default pull-to-refresh and bouncing page gestures on mobile devices */
         }
 
         .handwritten-font {
@@ -219,14 +220,15 @@
     </div>
 
     <!-- STAGE 3 (Galaxy Physics Map) -->
-    <div id="stage-3" class="absolute inset-0 z-20 hidden flex flex-col items-center justify-between bg-[#000000] select-none stage-transition">
-        <div class="w-full text-center pt-16 z-20">
+    <div id="stage-3" class="absolute inset-0 z-20 hidden flex flex-col items-center justify-between bg-[#000000] select-none stage-transition" style="touch-action: none;">
+        <!-- Made this header pointer-events-none so it never absorbs touches intended for dragging orbs on small displays -->
+        <div class="w-full text-center pt-16 z-20 pointer-events-none">
             <h2 class="text-white/80 tracking-[0.4em] uppercase text-xs font-semibold" style="font-family: 'Cinzel', serif; text-shadow: 0 0 10px rgba(255,255,255,0.3);">
                 two souls. one universe.
             </h2>
         </div>
 
-        <canvas id="galaxy-canvas" class="absolute inset-0 w-full h-full z-10 block touch-none"></canvas>
+        <canvas id="galaxy-canvas" class="absolute inset-0 w-full h-full z-10 block touch-none" style="touch-action: none;"></canvas>
 
         <div class="w-full text-center pb-16 z-20 pointer-events-none">
             <p class="text-white/80 tracking-[0.25em] uppercase text-xs font-bold" id="stage3-instruction">
@@ -583,6 +585,7 @@
 
         function handleStart(e) {
             if (isFusing) return;
+            // Prevent simulated mousedown after touchstart to prevent coordinate lag, and lock mobile panning entirely
             if (e.type === 'touchstart' && e.cancelable) e.preventDefault();
             const pos = getPos(e);
             if (Math.hypot(pos.x - youOrb.x, pos.y - youOrb.y) < 65) dragTarget = 'you';
@@ -590,8 +593,9 @@
         }
 
         function handleMove(e) {
-            if (!dragTarget || isFusing) return;
+            // Unconditionally prevent default on mobile touch-move to lock window bouncing and scrolling completely
             if (e.type === 'touchmove' && e.cancelable) e.preventDefault();
+            if (!dragTarget || isFusing) return;
             const pos = getPos(e);
             const margin = 30;
             const bX = Math.max(margin, Math.min(canvas.width - margin, pos.x));
