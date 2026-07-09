@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* Strict global lock to stop mobile browser scrolling on all stages */
         html, body {
             background-color: #020205;
             color: #ffffff;
@@ -19,10 +20,13 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            position: fixed; /* Prevents screen bounce on iOS/Android */
+            overflow: hidden !important;
+            position: fixed; 
+            top: 0;
+            left: 0;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none; /* Disables all standard browser gestures completely */
         }
 
         .handwritten-font {
@@ -65,19 +69,6 @@
             animation: rotateOrbit 120s linear infinite;
         }
 
-        .star-orbits::before, .star-orbits::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            border-radius: 50%;
-            border: 1px dashed rgba(255, 255, 255, 0.02);
-            transform: translate(-50%, -50%);
-        }
-
-        .star-orbits::before { width: 70%; height: 70%; }
-        .star-orbits::after { width: 40%; height: 40%; border: 1px double rgba(255, 255, 255, 0.015); }
-
         @keyframes rotateOrbit {
             to { transform: translate(-50%, -50%) rotate(360deg); }
         }
@@ -85,14 +76,10 @@
         .airmail-border {
             background: repeating-linear-gradient(
                 -45deg,
-                #ff4d4d,
-                #ff4d4d 15px,
-                #ffffff 15px,
-                #ffffff 30px,
-                #4d79ff 30px,
-                #4d79ff 45px,
-                #ffffff 45px,
-                #ffffff 60px
+                #ff4d4d, #ff4d4d 15px,
+                #ffffff 15px, #ffffff 30px,
+                #4d79ff 30px, #4d79ff 45px,
+                #ffffff 45px, #ffffff 60px
             );
             padding: 8px;
             border-radius: 12px;
@@ -104,7 +91,6 @@
             border-radius: 6px;
             position: relative;
             overflow: hidden;
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         #btn-later {
@@ -123,18 +109,21 @@
         }
 
         #galaxy-canvas {
-            touch-action: none !important; /* Locks browser gestures strictly on canvas */
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            touch-action: none !important;
         }
 
-        /* Allow scrolling ONLY inside the ending letter and letter modal */
+        /* ONLY ALLOW SCROLLING INSIDE THE LETTER CONTENTS */
         .allow-scroll {
             overflow-y: auto !important;
             -webkit-overflow-scrolling: touch !important;
-            position: relative !important;
+            touch-action: pan-y !important; /* Allows up/down swipe smoothly inside the letter card */
         }
     </style>
 </head>
-<body class="relative w-full h-[100dvh] flex flex-col items-center justify-center overflow-hidden">
+<body class="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
 
     <audio id="bg-music" loop preload="auto">
         <source src="music.mp3" type="audio/mpeg">
@@ -142,7 +131,7 @@
 
     <div class="star-orbits"></div>
 
-    <button id="music-toggle" class="absolute top-6 right-6 z-50 flex items-center gap-2 bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300">
+    <button id="music-toggle" class="absolute top-6 right-6 z-50 flex items-center gap-2 bg-black/60 border border-white/20 px-4 py-2 rounded-full text-xs font-semibold tracking-wider">
         <span id="music-status-text" class="text-white/80">SOUND ON</span>
         <div class="flex items-end gap-0.5 h-3 w-4">
             <span class="music-bar w-0.5 bg-pink-500 rounded-full h-full animate-pulse" style="animation-duration: 0.5s"></span>
@@ -160,55 +149,52 @@
             <div class="space-y-3">
                 <h1 class="text-3xl font-bold tracking-wide">Dear You 🩷</h1>
                 <p class="text-sm text-white/70 max-w-xs mx-auto leading-relaxed">
-                    I couldn't fit everything I feel into a single message...
-                    So I built this starry universe instead.
+                    I couldn't fit everything I feel into a single message... So I built this starry universe instead.
                 </p>
             </div>
-            <button id="btn-enter" class="px-8 py-3 bg-gradient-to-r from-pink-600 to-red-600 text-sm font-semibold tracking-widest rounded-full transition-all duration-300 hover:scale-105 shadow-lg shadow-pink-600/30">
+            <button id="btn-enter" class="px-8 py-3 bg-gradient-to-r from-pink-600 to-red-600 text-sm font-semibold tracking-widest rounded-full shadow-lg shadow-pink-600/30">
                 Read My Heart 💌
             </button>
         </div>
     </div>
 
     <div id="stage-1" class="absolute inset-0 z-30 hidden flex-col items-center justify-center bg-[#020205]/95 text-center p-6 stage-transition">
-        
         <div id="story-text-frame" class="text-2xl md:text-5xl font-semibold select-none handwritten-font tracking-wide flex flex-col items-center gap-3 max-w-3xl px-4">
-            <div id="s1-part1" class="min-h-[40px] leading-normal flex items-center justify-center"></div>
-            <div id="s1-part2" class="text-pink-500 font-bold min-h-[40px] leading-normal flex items-center justify-center"></div>
-            <div id="s1-part-but" class="text-zinc-400 font-light italic min-h-[30px] text-xl md:text-3xl leading-normal flex items-center justify-center"></div>
-            <div id="s1-part3" class="text-red-500 neon-text-red font-bold min-h-[40px] leading-normal flex items-center justify-center"></div>
+            <div id="s1-part1" class="min-h-[40px] flex items-center justify-center"></div>
+            <div id="s1-part2" class="text-pink-500 font-bold min-h-[40px] flex items-center justify-center"></div>
+            <div id="s1-part-but" class="text-zinc-400 font-light italic min-h-[30px] text-xl md:text-3xl flex items-center justify-center"></div>
+            <div id="s1-part3" class="text-red-500 neon-text-red font-bold min-h-[40px] flex items-center justify-center"></div>
             
             <div id="really-btn-container" class="opacity-0 transition-opacity duration-1000 pt-6 flex justify-center">
-                <button id="btn-really" class="px-8 py-2.5 border-2 border-pink-500/40 hover:border-pink-500 text-pink-500 hover:bg-pink-500/10 text-xl font-medium tracking-wide rounded-full transition-all duration-300 transform hover:scale-105">
+                <button id="btn-really" class="px-8 py-2.5 border-2 border-pink-500/40 text-pink-500 text-xl font-medium rounded-full">
                     Really?
                 </button>
             </div>
         </div>
 
         <div id="chapter-text-frame" class="hidden flex-col items-center justify-center space-y-8 select-none max-w-xl px-4">
-            <h1 class="text-3xl md:text-5xl neon-text-pink-low font-bold tracking-wide italic leading-relaxed scale-95 opacity-0 transition-all duration-1000 ease-out text-center" id="chapter-title" style="font-family: 'Playfair Display', serif;">
+            <h1 class="text-3xl md:text-5xl neon-text-pink-low font-bold tracking-wide italic text-center" id="chapter-title" style="font-family: 'Playfair Display', serif;">
                 "Yes, and you are<br>my favorite chapter. ❤️"
             </h1>
-            
             <div class="flex flex-row items-center justify-center gap-6 pt-4 w-full relative min-h-[100px]" id="choice-buttons-box">
-                <button id="btn-aww" class="px-6 py-3 bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 text-white font-semibold text-xs md:text-sm tracking-wide rounded-full shadow-lg hover:shadow-pink-600/30 transition-all duration-300 z-20">
+                <button id="btn-aww" class="px-6 py-3 bg-gradient-to-r from-pink-600 to-red-600 text-white font-semibold text-xs md:text-sm tracking-wide rounded-full shadow-lg">
                     Aww... let's see 🙈
                 </button>
-                <button id="btn-later" class="px-6 py-3 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-400 font-medium text-xs md:text-sm tracking-wide rounded-full border border-zinc-700/40 z-30 whitespace-nowrap shadow-md">
+                <button id="btn-later" class="px-6 py-3 bg-zinc-900/90 text-zinc-400 font-medium text-xs md:text-sm rounded-full border border-zinc-700/40 whitespace-nowrap shadow-md">
                     Maybe later 🙄
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="stage-3" class="absolute inset-0 z-20 hidden flex flex-col items-center justify-between bg-[#000000] select-none stage-transition overflow-hidden">
+    <div id="stage-3" class="absolute inset-0 z-20 hidden flex-col items-center justify-between bg-[#000000] select-none stage-transition overflow-hidden">
         <div class="w-full text-center pt-12 z-20 px-4">
-            <h2 class="text-white/80 tracking-[0.3em] uppercase text-[10px] md:text-xs font-semibold" style="font-family: 'Cinzel', serif; text-shadow: 0 0 10px rgba(255,255,255,0.3);">
+            <h2 class="text-white/80 tracking-[0.3em] uppercase text-[10px] md:text-xs font-semibold" style="font-family: 'Cinzel', serif;">
                 two souls. one universe.
             </h2>
         </div>
 
-        <canvas id="galaxy-canvas" class="absolute inset-0 w-full h-full z-10 block"></canvas>
+        <canvas id="galaxy-canvas"></canvas>
 
         <div class="w-full text-center pb-12 z-20 pointer-events-none px-4">
             <p class="text-white/80 tracking-[0.2em] uppercase text-[10px] md:text-xs font-bold animate-pulse" id="stage3-instruction">
@@ -217,34 +203,27 @@
         </div>
     </div>
 
-    <div id="stage-4" class="absolute inset-0 z-10 hidden flex-col items-center justify-start bg-[#020205] p-6 text-center stage-transition allow-scroll">
-        <div class="space-y-10 z-10 max-w-lg my-auto py-12 relative flex flex-col items-center">
+    <div id="stage-4" class="absolute inset-0 z-10 hidden flex-col items-center justify-center bg-[#020205] p-6 text-center stage-transition overflow-hidden">
+        <div class="space-y-10 z-10 max-w-lg flex flex-col items-center">
             <div class="space-y-4 flex flex-col items-center">
                 <span class="text-[10px] md:text-sm tracking-[0.4em] text-pink-500 font-bold block" style="font-family: 'Cinzel', serif;">
                     AMONG COUNTLESS HEARTS
                 </span>
-                <h1 class="text-3xl md:text-6xl font-normal text-white italic py-2 drop-shadow-[0_0_20px_rgba(244,63,94,0.65)]" style="font-family: 'Playfair Display', serif;">
+                <h1 class="text-3xl md:text-6xl font-normal text-white italic py-2" style="font-family: 'Playfair Display', serif;">
                     "...I found home in you."
                 </h1>
-                <span class="text-[10px] md:text-sm tracking-[0.2em] text-white uppercase font-bold block" style="font-family: 'Cinzel', serif;">
-                    Some souls are meant to meet.
-                </span>
             </div>
 
             <div class="flex justify-center py-4">
-                <div class="airmail-border w-[260px] md:w-[280px] h-[170px] md:h-[180px] cursor-pointer hover:scale-105 transition-transform duration-300 active:scale-95 shadow-lg shadow-pink-500/10" id="envelope-wrapper">
+                <div class="airmail-border w-[260px] md:w-[280px] h-[170px] md:h-[180px] cursor-pointer" id="envelope-wrapper">
                     <div class="envelope-body w-full h-full flex flex-col justify-center items-center text-zinc-800 p-4 space-y-2 bg-white">
-                        <div class="absolute top-2 right-2 border border-zinc-400 w-8 h-10 flex items-center justify-center text-[10px] text-zinc-500 font-serif rotate-12">
-                            POST
-                        </div>
                         <i class="fa-solid fa-heart text-red-500 text-3xl heart-pulse"></i>
                         <span class="text-[10px] font-bold tracking-widest text-zinc-500 uppercase text-center px-1">To The One Who changed Everything💞</span>
-                        <div class="w-12 h-0.5 bg-zinc-200"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="animate-bounce pt-2 pointer-events-none">
+            <div class="animate-bounce pt-2">
                 <p class="text-[10px] md:text-xs text-pink-400 tracking-widest uppercase font-black" id="envelope-hint">
                     TAP THE LETTER TO OPEN ✦
                 </p>
@@ -254,11 +233,11 @@
 
     <div id="letter-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/90 backdrop-blur-md opacity-0 transition-opacity duration-500">
         <div class="letter-modal w-full max-w-md p-6 md:p-10 rounded-2xl border border-pink-500/30 relative transform scale-90 opacity-0 transition-all duration-500 flex flex-col space-y-6 bg-zinc-950/90 shadow-2xl overflow-hidden">
-            <button id="modal-close" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-2 text-xl z-20">
+            <button id="modal-close" class="absolute top-4 right-4 text-white/50 hover:text-white p-2 text-xl z-20">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <div class="allow-scroll pr-1 space-y-6 text-left select-text max-h-[60vh] scrollbar-thin scrollbar-thumb-pink-500">
+            <div class="allow-scroll pr-2 space-y-6 text-left select-text max-h-[55vh] scrollbar-thin scrollbar-thumb-pink-500">
                 <h3 class="text-3xl text-pink-500 font-bold tracking-wide" style="font-family: 'Caveat', cursive;">Dear Love,</h3>
                 <p class="text-zinc-200 text-base md:text-lg leading-relaxed font-light tracking-wide space-y-4">
                     Before this journey ends, there's one thing I want you to remember...
@@ -277,13 +256,9 @@
             </div>
 
             <div class="pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
-                <button id="btn-replay" class="text-[10px] tracking-widest text-white/60 hover:text-pink-500 transition-colors uppercase font-bold flex items-center gap-2">
+                <button id="btn-replay" class="text-[10px] tracking-widest text-white/60 uppercase font-bold flex items-center gap-2">
                     <i class="fa-solid fa-rotate-left"></i> Replay Journey
                 </button>
-                <div class="flex gap-2 text-pink-500/60">
-                    <i class="fa-solid fa-sparkles animate-pulse"></i>
-                    <i class="fa-solid fa-heart animate-ping"></i>
-                </div>
             </div>
         </div>
     </div>
@@ -300,17 +275,20 @@
         const stage4 = document.getElementById('stage-4');
         const letterModal = document.getElementById('letter-modal');
         const envelopeWrapper = document.getElementById('envelope-wrapper');
-        
         const btnLater = document.getElementById('btn-later');
         const choiceBox = document.getElementById('choice-buttons-box');
 
-        // Block overall elastic elastic scroll behavior on stage 3 ONLY via JS safely
-        function blockScroll(e) {
-            if (stage3.classList.contains('flex')) {
-                e.preventDefault();
+        // FORCE BLOCK browser touch-scroll events anywhere except inside ".allow-scroll" element
+        document.addEventListener('touchmove', function(e) {
+            let target = e.target;
+            while (target && target !== document.body) {
+                if (target.classList && target.classList.contains('allow-scroll')) {
+                    return; // Let scroll happen safely inside letter modal text
+                }
+                target = target.parentNode;
             }
-        }
-        document.addEventListener('touchmove', blockScroll, { passive: false });
+            e.preventDefault(); // Lock and freeze all other scrolls completely
+        }, { passive: false });
 
         function initAudio() {
             if (!audioStarted) {
@@ -318,20 +296,13 @@
                 bgMusic.play().then(() => {
                     audioStarted = true;
                     updateMusicVisuals(true);
-                }).catch(err => {
-                    console.log("Audio play interaction safe-checked.");
-                });
+                }).catch(() => {});
             }
         }
 
         function toggleMusic() {
-            if (bgMusic.paused) {
-                bgMusic.play();
-                updateMusicVisuals(true);
-            } else {
-                bgMusic.pause();
-                updateMusicVisuals(false);
-            }
+            if (bgMusic.paused) { bgMusic.play(); updateMusicVisuals(true); } 
+            else { bgMusic.pause(); updateMusicVisuals(false); }
         }
 
         function updateMusicVisuals(isPlaying) {
@@ -345,17 +316,13 @@
         document.getElementById('btn-enter').addEventListener('click', () => {
             initAudio();
             startScreen.classList.add('opacity-0');
-            setTimeout(() => {
-                startScreen.classList.add('hidden');
-                runStage1();
-            }, 1000);
+            setTimeout(() => { startScreen.classList.add('hidden'); runStage1(); }, 1000);
         });
 
         function animateABC(elementId, text, speed = 40, callback) {
             const container = document.getElementById(elementId);
             container.innerHTML = '';
             let index = 0;
-            
             function addLetter() {
                 if (index < text.length) {
                     const char = text[index];
@@ -365,18 +332,13 @@
                     container.appendChild(span);
                     index++;
                     setTimeout(addLetter, speed);
-                } else if (callback) {
-                    callback();
-                }
+                } else if (callback) { callback(); }
             }
             addLetter();
         }
 
         function runStage1() {
-            stage1.classList.remove('hidden');
-            stage1.classList.add('flex');
-            stage1.classList.remove('opacity-0');
-            
+            stage1.classList.remove('hidden'); stage1.classList.add('flex', 'opacity-100');
             animateABC('s1-part1', 'They say', 50, () => {
                 setTimeout(() => {
                     animateABC('s1-part2', 'love stories are written...', 45, () => {
@@ -384,9 +346,7 @@
                             animateABC('s1-part-but', 'but', 50, () => {
                                 setTimeout(() => {
                                     animateABC('s1-part3', 'I decided to code mine.', 45, () => {
-                                        setTimeout(() => {
-                                            document.getElementById('really-btn-container').classList.replace('opacity-0', 'opacity-100');
-                                        }, 400);
+                                        setTimeout(() => { document.getElementById('really-btn-container').classList.replace('opacity-0', 'opacity-100'); }, 400);
                                     });
                                 }, 800);
                             });
@@ -397,83 +357,58 @@
         }
 
         document.getElementById('btn-really').addEventListener('click', () => {
-            document.getElementById('story-text-frame').classList.add('opacity-0');
+            document.getElementById('story-text-frame').classList.add('opacity-0', 'hidden');
+            const chapFrame = document.getElementById('chapter-text-frame');
+            chapFrame.classList.remove('hidden'); chapFrame.classList.add('flex');
+            btnLater.style.transform = 'translate(0px, 0px) scale(1)';
             setTimeout(() => {
-                document.getElementById('story-text-frame').classList.add('hidden');
-                const chapFrame = document.getElementById('chapter-text-frame');
-                chapFrame.classList.remove('hidden');
-                chapFrame.classList.add('flex');
-                resetLaterButton();
-
-                setTimeout(() => {
-                    const title = document.getElementById('chapter-title');
-                    title.classList.remove('scale-95', 'opacity-0');
-                    title.classList.add('scale-100', 'opacity-100');
-                }, 100);
-            }, 800);
+                const title = document.getElementById('chapter-title');
+                title.classList.remove('scale-95', 'opacity-0'); title.classList.add('scale-100', 'opacity-100');
+            }, 100);
         });
 
         function teleportButton() {
             const containerWidth = choiceBox.offsetWidth;
-            const currentLeft = btnLater.offsetLeft;
-            const shiftAmount = 100; 
-            
-            let targetX = currentLeft < containerWidth / 2 ? shiftAmount : -shiftAmount;
-            const targetY = (Math.random() > 0.5 ? -20 : 20);
-            btnLater.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.95)`;
+            const shiftAmount = 90; 
+            let targetX = btnLater.offsetLeft < containerWidth / 2 ? shiftAmount : -shiftAmount;
+            btnLater.style.transform = `translate(${targetX}px, ${Math.random() > 0.5 ? -15 : 15}px) scale(0.95)`;
         }
-
         btnLater.addEventListener('mouseenter', teleportButton);
-        btnLater.addEventListener('touchstart', (e) => {
-            e.preventDefault(); 
-            teleportButton();
-        });
-
-        function resetLaterButton() {
-            btnLater.style.transform = 'translate(0px, 0px) scale(1)';
-        }
+        btnLater.addEventListener('touchstart', (e) => { e.preventDefault(); teleportButton(); });
 
         document.getElementById('btn-aww').addEventListener('click', () => {
             stage1.classList.add('opacity-0');
-            setTimeout(() => {
-                stage1.classList.remove('flex');
-                stage1.classList.add('hidden');
-                runStage3();
-            }, 1000);
+            setTimeout(() => { stage1.classList.remove('flex'); stage1.classList.add('hidden'); runStage3(); }, 1000);
         });
 
-        // STAGE 3: Galaxy Logic Fixed
+        // STAGE 3: Galaxy Engine Logic
         let canvas, ctx;
         let youOrb, meOrb;
         let starfield = [], meTrail = [], heartParticles = [], explosionParticles = [];
         let isFusing = false, fuseProgress = 0, dragTarget = null;
 
         function runStage3() {
-            stage3.classList.remove('hidden');
-            stage3.classList.add('flex');
-            stage3.classList.remove('opacity-0');
-
+            stage3.classList.remove('hidden'); stage3.classList.add('flex', 'opacity-100');
             canvas = document.getElementById('galaxy-canvas');
             ctx = canvas.getContext('2d');
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
 
             starfield = [];
-            for (let i = 0; i < 150; i++) {
+            for (let i = 0; i < 120; i++) {
                 starfield.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    size: 0.5 + Math.random() * 1.5,
+                    size: 0.6 + Math.random() * 1.4,
                     opacity: 0.3 + Math.random() * 0.7,
-                    twinkleSpeed: 0.008 + Math.random() * 0.015,
+                    twinkleSpeed: 0.01 + Math.random() * 0.015,
                     phase: Math.random() * Math.PI * 2
                 });
             }
 
             const centerY = canvas.height / 2;
-            // Placed within comfortable view range
-            youOrb = { x: canvas.width * 0.22, y: centerY, targetX: canvas.width * 0.22, targetY: centerY, radius: 26, color: '#ff007f', glowColor: 'rgba(255, 0, 127, 0.85)', label: 'YOU' };
-            meOrb = { x: canvas.width * 0.78, y: centerY, targetX: canvas.width * 0.78, targetY: centerY, radius: 26, color: '#ff3333', glowColor: 'rgba(255, 51, 51, 0.85)', label: 'ME' };
+            youOrb = { x: canvas.width * 0.22, y: centerY, targetX: canvas.width * 0.22, targetY: centerY, radius: 25, color: '#ff007f', glowColor: 'rgba(255, 0, 127, 0.85)', label: 'YOU' };
+            meOrb = { x: canvas.width * 0.78, y: centerY, targetX: canvas.width * 0.78, targetY: centerY, radius: 25, color: '#ff3333', glowColor: 'rgba(255, 51, 51, 0.85)', label: 'ME' };
 
             canvas.addEventListener('mousedown', handleStart);
             canvas.addEventListener('mousemove', handleMove);
@@ -491,48 +426,36 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             if (youOrb && meOrb && !isFusing) {
-                youOrb.y = canvas.height / 2;
-                meOrb.y = canvas.height / 2;
+                youOrb.y = canvas.height / 2; meOrb.y = canvas.height / 2;
             }
         }
 
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
             if (e.touches && e.touches.length > 0) {
-                return { 
-                    x: e.touches[0].clientX - rect.left, 
-                    y: e.touches[0].clientY - rect.top 
-                };
+                return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
             }
             return { x: e.clientX - rect.left, y: e.clientY - rect.top };
         }
 
         function handleStart(e) {
             if (isFusing) return;
-            if (e.cancelable) e.preventDefault(); 
             const pos = getPos(e);
-            
-            // Generous hit box area (85px) for easy finger detection on screen
-            if (Math.hypot(pos.x - youOrb.x, pos.y - youOrb.y) < 85) dragTarget = 'you';
-            else if (Math.hypot(pos.x - meOrb.x, pos.y - meOrb.y) < 85) dragTarget = 'me';
+            // Dynamic wider touch bounds (100px) so fingers grab circles immediately
+            if (Math.hypot(pos.x - youOrb.x, pos.y - youOrb.y) < 100) dragTarget = 'you';
+            else if (Math.hypot(pos.x - meOrb.x, pos.y - meOrb.y) < 100) dragTarget = 'me';
         }
 
         function handleMove(e) {
             if (!dragTarget || isFusing) return;
-            if (e.cancelable) e.preventDefault(); 
-            
             const pos = getPos(e);
-            const margin = 25;
-            const bX = Math.max(margin, Math.min(canvas.width - margin, pos.x));
-            const bY = Math.max(margin, Math.min(canvas.height - margin, pos.y));
             
-            if (dragTarget === 'you') { youOrb.targetX = bX; youOrb.targetY = bY; }
-            else if (dragTarget === 'me') { meOrb.targetX = bX; meOrb.targetY = bY; }
+            // Continuous immediate position update
+            if (dragTarget === 'you') { youOrb.targetX = pos.x; youOrb.targetY = pos.y; }
+            else if (dragTarget === 'me') { meOrb.targetX = pos.x; meOrb.targetY = pos.y; }
         }
 
-        function handleEnd(e) { 
-            dragTarget = null; 
-        }
+        function handleEnd() { dragTarget = null; }
 
         function gameLoop() {
             if (!canvas) return;
@@ -545,69 +468,39 @@
                 ctx.beginPath(); ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2); ctx.fill();
             });
 
-            const lerpSpeed = 0.25; // Smoother faster lock transition
-            youOrb.x += (youOrb.targetX - youOrb.x) * lerpSpeed;
-            youOrb.y += (youOrb.targetY - youOrb.y) * lerpSpeed;
-            meOrb.x += (meOrb.targetX - meOrb.x) * lerpSpeed;
-            meOrb.y += (meOrb.targetY - meOrb.y) * lerpSpeed;
+            // Instant absolute tracking speed for fingers
+            youOrb.x += (youOrb.targetX - youOrb.x) * 0.4;
+            youOrb.y += (youOrb.targetY - youOrb.y) * 0.4;
+            meOrb.x += (meOrb.targetX - meOrb.x) * 0.4;
+            meOrb.y += (meOrb.targetY - meOrb.y) * 0.4;
 
             if (!isFusing) {
                 meTrail.push({ x: meOrb.x, y: meOrb.y });
-                if (meTrail.length > 25) meTrail.shift();
+                if (meTrail.length > 20) meTrail.shift();
             }
 
-            ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             for (let i = 0; i < meTrail.length; i++) {
-                ctx.fillStyle = `rgba(255, 51, 51, ${(i / meTrail.length) * 0.45})`;
+                ctx.fillStyle = `rgba(255, 51, 51, ${(i / meTrail.length) * 0.4})`;
+                ctx.font = 'bold 11px sans-serif';
                 ctx.fillText((i % 2 === 0) ? 'M' : 'E', meTrail[i].x, meTrail[i].y);
             }
 
             const currentDist = Math.hypot(youOrb.x - meOrb.x, youOrb.y - meOrb.y);
             
-            // Triggers automatically when circles are overlapping or very close
-            if (currentDist < 60 && !isFusing) {
+            // MAGNETIC MEET SYSTEM: Triggers fusion dynamically within generous 75 pixels proximity
+            if (currentDist < 75 && !isFusing) {
                 isFusing = true; dragTarget = null;
                 triggerFusionExplosion();
             }
 
-            const midX = (youOrb.x + meOrb.x) / 2, midY = (youOrb.y + meOrb.y) / 2;
-
-            if (!isFusing && Math.random() < 0.08) {
-                heartParticles.push({
-                    x: midX + (Math.random() - 0.5) * currentDist * 0.7,
-                    y: midY + (Math.random() - 0.5) * 40,
-                    size: 2 + Math.random() * 3,
-                    color: Math.random() > 0.5 ? 'rgba(255, 0, 127, 0.4)' : 'rgba(255, 51, 51, 0.4)',
-                    alpha: 0.7,
-                    decay: 0.01 + Math.random() * 0.01
-                });
-            }
-
-            heartParticles.forEach((p, idx) => {
-                p.alpha -= p.decay;
-                if (p.alpha <= 0) return heartParticles.splice(idx, 1);
-                ctx.shadowBlur = 10; ctx.shadowColor = p.color; ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
-            });
-            ctx.globalAlpha = 1; ctx.shadowBlur = 0;
-
-            if (!isFusing) { 
-                drawOrb(ctx, youOrb); 
-                drawOrb(ctx, meOrb); 
-            } else { 
-                drawFusionProcess(ctx, midX, midY); 
-            }
+            if (!isFusing) { drawOrb(ctx, youOrb); drawOrb(ctx, meOrb); } 
+            else { drawFusionProcess(ctx, (youOrb.x + meOrb.x)/2, (youOrb.y + meOrb.y)/2); }
 
             explosionParticles.forEach((p, idx) => {
                 p.x += p.vx; p.y += p.vy; p.alpha -= p.decay;
                 if (p.alpha <= 0) return explosionParticles.splice(idx, 1);
-                ctx.shadowBlur = 15; ctx.shadowColor = p.color; ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha;
-                if (p.shape === 'heart') { 
-                    drawParticleHeart(ctx, p.x, p.y, p.size); 
-                } else { 
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); 
-                }
+                ctx.shadowBlur = 10; ctx.shadowColor = p.color; ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
             });
             ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 
@@ -615,122 +508,55 @@
         }
 
         function drawOrb(context, orb) {
-            context.save(); context.shadowBlur = 35; context.shadowColor = orb.glowColor;
-            const grad = context.createRadialGradient(orb.x, orb.y, 2, orb.x, orb.y, orb.radius + 15);
-            grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.3, orb.color); grad.addColorStop(1, 'rgba(0,0,0,0)');
-            context.fillStyle = grad; context.beginPath(); context.arc(orb.x, orb.y, orb.radius + 15, 0, Math.PI * 2); context.fill();
-            context.shadowBlur = 10; context.fillStyle = '#ffffff'; context.beginPath(); context.arc(orb.x, orb.y, orb.radius * 0.4, 0, Math.PI * 2); context.fill();
-            context.shadowBlur = 0; context.fillStyle = 'rgba(255, 255, 255, 0.8)'; context.font = 'bold 10px "Plus Jakarta Sans", sans-serif'; context.letterSpacing = '3px';
-            context.fillText(orb.label, orb.x, orb.y - orb.radius - 15); context.restore();
-        }
-
-        function drawParticleHeart(context, x, y, size) {
-            context.beginPath(); context.moveTo(x, y + size / 4);
-            context.bezierCurveTo(x, y - size / 2, x - size, y - size / 2, x - size, y + size / 4);
-            context.bezierCurveTo(x - size, y + size, x, y + size * 1.5, x, y + size * 1.8);
-            context.bezierCurveTo(x, y + size * 1.5, x + size, y + size, x + size, y + size / 4);
-            context.bezierCurveTo(x + size, y - size / 2, x, y - size / 2, x, y + size / 4);
-            context.closePath(); context.fill();
+            context.save(); context.shadowBlur = 30; context.shadowColor = orb.glowColor;
+            context.fillStyle = orb.color; context.beginPath(); context.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2); context.fill();
+            context.fillStyle = '#ffffff'; context.beginPath(); context.arc(orb.x, orb.y, orb.radius * 0.3, 0, Math.PI * 2); context.fill();
+            context.fillStyle = 'rgba(255, 255, 255, 0.7)'; context.font = 'bold 10px sans-serif';
+            context.fillText(orb.label, orb.x, orb.y - orb.radius - 12); context.restore();
         }
 
         function triggerFusionExplosion() {
             const midX = (youOrb.x + meOrb.x) / 2, midY = (youOrb.y + meOrb.y) / 2;
-            
-            for (let i = 0; i < 350; i++) {
-                const angle = (i / 350) * Math.PI * 2;
-                const hx = 16 * Math.pow(Math.sin(angle), 3);
-                const hy = -(13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle));
-                
-                const baseSpeed = 1.0 + Math.random() * 4.0;
+            for (let i = 0; i < 200; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1 + Math.random() * 5;
                 explosionParticles.push({
-                    x: midX,
-                    y: midY,
-                    vx: hx * 0.35 * baseSpeed, 
-                    vy: hy * 0.35 * baseSpeed,
+                    x: midX, y: midY,
+                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
                     color: Math.random() > 0.5 ? '#ff007f' : '#ff3333',
-                    alpha: 1,
-                    size: 4 + Math.random() * 6, 
-                    shape: Math.random() > 0.3 ? 'heart' : 'circle',
-                    decay: 0.005 + Math.random() * 0.006
+                    alpha: 1, size: 3 + Math.random() * 4, decay: 0.01
                 });
             }
-
-            document.getElementById('stage3-instruction').classList.add('opacity-0');
             setTimeout(() => {
                 stage3.classList.add('opacity-0');
-                setTimeout(() => { 
-                    stage3.classList.remove('flex'); 
-                    stage3.classList.add('hidden'); 
-                    runStage4(); 
-                }, 1000);
-            }, 3000);
+                setTimeout(() => { stage3.classList.remove('flex'); stage3.classList.add('hidden'); runStage4(); }, 1000);
+            }, 2000);
         }
 
         function drawFusionProcess(context, midX, midY) {
-            fuseProgress += 0.015; if (fuseProgress > 1) fuseProgress = 1;
-            const radius = 26 * (1.0 + fuseProgress * 6.0);
-            context.save(); context.shadowBlur = 50; context.shadowColor = '#ff007f'; context.globalAlpha = 1.0 - fuseProgress;
-            const grad = context.createRadialGradient(midX, midY, 1, midX, midY, radius);
-            grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.3, '#ff007f'); grad.addColorStop(0.7, '#ff3333'); grad.addColorStop(1, 'rgba(0,0,0,0)');
-            context.fillStyle = grad; context.beginPath(); context.arc(midX, midY, radius, 0, Math.PI * 2); context.fill(); context.restore(); context.globalAlpha = 1.0;
+            fuseProgress += 0.02; if (fuseProgress > 1) fuseProgress = 1;
+            context.save(); context.fillStyle = '#ffffff'; context.beginPath(); context.arc(midX, midY, 25 * (1 + fuseProgress * 4), 0, Math.PI * 2); context.fill(); context.restore();
         }
 
         function runStage4() {
-            stage4.classList.remove('hidden'); stage4.classList.add('flex');
+            stage4.classList.remove('hidden'); stage4.classList.add('flex', 'opacity-100');
             envelopeWrapper.addEventListener('click', () => {
-                document.getElementById('envelope-hint').innerText = "OPENING THE LOVE LETTER...";
+                letterModal.classList.remove('hidden'); letterModal.classList.add('flex');
                 setTimeout(() => {
-                    letterModal.classList.remove('hidden'); letterModal.classList.add('flex');
-                    setTimeout(() => {
-                        letterModal.classList.add('opacity-100');
-                        const card = letterModal.querySelector('.letter-modal');
-                        card.classList.remove('scale-90', 'opacity-0'); card.classList.add('scale-100', 'opacity-100');
-                    }, 50);
-                    document.getElementById('envelope-hint').innerText = "TAP TO OPEN THE LETTER ✦";
-                }, 1000);
+                    letterModal.classList.add('opacity-100');
+                    letterModal.querySelector('.letter-modal').classList.remove('scale-90', 'opacity-0');
+                    letterModal.querySelector('.letter-modal').classList.add('scale-100', 'opacity-100');
+                }, 50);
             });
         }
 
         document.getElementById('modal-close').addEventListener('click', () => {
-            const card = letterModal.querySelector('.letter-modal');
-            card.classList.replace('scale-100', 'scale-90'); card.classList.replace('opacity-100', 'opacity-0');
             letterModal.classList.remove('opacity-100');
             setTimeout(() => { letterModal.classList.remove('flex'); letterModal.classList.add('hidden'); }, 500);
         });
 
         document.getElementById('btn-replay').addEventListener('click', () => {
-            const card = letterModal.querySelector('.letter-modal');
-            card.classList.replace('scale-100', 'scale-90'); card.classList.replace('opacity-100', 'opacity-0');
-            letterModal.classList.remove('opacity-100');
-            setTimeout(() => {
-                letterModal.classList.remove('flex'); letterModal.classList.add('hidden');
-                stage4.classList.add('opacity-0');
-                
-                isFusing = false; 
-                fuseProgress = 0; 
-                heartParticles = []; 
-                explosionParticles = []; 
-                meTrail = [];
-                
-                setTimeout(() => {
-                    stage4.classList.remove('flex'); 
-                    stage4.classList.add('hidden'); 
-                    stage4.classList.remove('opacity-0');
-                    
-                    document.getElementById('chapter-text-frame').classList.add('hidden');
-                    document.getElementById('chapter-title').classList.add('scale-95', 'opacity-0');
-                    
-                    document.getElementById('s1-part1').innerHTML = '';
-                    document.getElementById('s1-part2').innerHTML = '';
-                    document.getElementById('s1-part-but').innerHTML = '';
-                    document.getElementById('s1-part3').innerHTML = '';
-                    document.getElementById('really-btn-container').classList.replace('opacity-100', 'opacity-0');
-                    
-                    document.getElementById('story-text-frame').classList.remove('hidden', 'opacity-0');
-                    resetLaterButton();
-                    runStage1();
-                }, 1000);
-            }, 500);
+            location.reload(); // Restarts smoothly and cleans all states safely
         });
     </script>
 </body>
