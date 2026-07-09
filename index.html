@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Two Souls. One Universe.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,11 +11,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        body {
+        html, body {
             background-color: #020205;
             color: #ffffff;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden !important; /* Forces screen scroll to freeze on mobile */
+            position: fixed; /* Prevents bounce scrolling inside iOS and Android engines */
             user-select: none;
             -webkit-user-select: none;
         }
@@ -24,7 +29,6 @@
             font-family: 'Patrick Hand', cursive;
         }
 
-        /* Dark Pink with low-shine neon styling */
         .neon-text-pink-low {
             color: #d11a5b;
             text-shadow: 0 0 10px rgba(209, 26, 91, 0.5), 0 0 20px rgba(209, 26, 91, 0.2);
@@ -51,7 +55,6 @@
             transition: opacity 1s ease-in-out, transform 1s ease-in-out;
         }
 
-        /* Beautiful rotating cosmic coordinate star orbits */
         .star-orbits {
             position: absolute;
             top: 50%;
@@ -76,16 +79,8 @@
             transform: translate(-50%, -50%);
         }
 
-        .star-orbits::before {
-            width: 70%;
-            height: 70%;
-        }
-
-        .star-orbits::after {
-            width: 40%;
-            height: 40%;
-            border: 1px double rgba(255, 255, 255, 0.015);
-        }
+        .star-orbits::before { width: 70%; height: 70%; }
+        .star-orbits::after { width: 40%; height: 40%; border: 1px double rgba(255, 255, 255, 0.015); }
 
         @keyframes rotateOrbit {
             to { transform: translate(-50%, -50%) rotate(360deg); }
@@ -116,12 +111,10 @@
             transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Runaway Button Smooth Transition */
         #btn-later {
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* Elegant letter-by-letter typing animation styles */
         .abc-letter {
             display: inline-block;
             opacity: 0;
@@ -130,21 +123,21 @@
         }
 
         @keyframes abcLetterIn {
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Essential Mobile Fix for Galaxy Stage Canvas element */
+        #galaxy-canvas {
+            touch-action: none !important; /* Strictly overrides and stops native drag scroll gestures */
         }
     </style>
 </head>
-<body class="relative min-h-screen flex flex-col items-center justify-center bg-[#020205]">
+<body class="relative w-full h-full flex flex-col items-center justify-center">
 
-    <!-- Background music using a gorgeous romantic Hindi lofi melody -->
     <audio id="bg-music" loop preload="auto">
         <source src="music.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Faint cosmic coordinates grid background from video -->
     <div class="star-orbits"></div>
 
     <button id="music-toggle" class="absolute top-6 right-6 z-50 flex items-center gap-2 bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300">
@@ -156,7 +149,6 @@
         </div>
     </button>
 
-    <!-- START SCREEN -->
     <div id="start-screen" class="absolute inset-0 z-50 bg-[#020205] flex flex-col items-center justify-center text-center p-6 stage-transition">
         <div class="max-w-md space-y-8">
             <div class="relative inline-block">
@@ -176,18 +168,12 @@
         </div>
     </div>
 
-    <!-- STAGE 1 (Story Telling & Favourite Chapter) -->
     <div id="stage-1" class="absolute inset-0 z-30 hidden flex-col items-center justify-center bg-[#020205]/95 text-center p-6 stage-transition">
         
-        <!-- Frame 1: Typed love stories intro with perfectly balanced lines & gaps -->
         <div id="story-text-frame" class="text-3xl md:text-5xl font-semibold select-none handwritten-font tracking-wide flex flex-col items-center gap-4 max-w-3xl">
-            <!-- Line 1: They say -->
             <div id="s1-part1" class="min-h-[45px] leading-normal flex items-center justify-center"></div>
-            <!-- Line 2: love stories are written... -->
             <div id="s1-part2" class="text-pink-500 font-bold min-h-[45px] leading-normal flex items-center justify-center"></div>
-            <!-- Line 3: "but" (Placed strictly in-between) -->
             <div id="s1-part-but" class="text-zinc-400 font-light italic min-h-[35px] text-2xl md:text-3xl leading-normal flex items-center justify-center"></div>
-            <!-- Line 4: I decided to code mine. -->
             <div id="s1-part3" class="text-red-500 neon-text-red font-bold min-h-[45px] leading-normal flex items-center justify-center"></div>
             
             <div id="really-btn-container" class="opacity-0 transition-opacity duration-1000 pt-6 flex justify-center">
@@ -197,13 +183,11 @@
             </div>
         </div>
 
-        <!-- Frame 2: Dark Pink Favorite Chapter Frame -->
         <div id="chapter-text-frame" class="hidden flex-col items-center justify-center space-y-10 select-none max-w-xl">
             <h1 class="text-4xl md:text-5xl neon-text-pink-low font-bold tracking-wide italic leading-relaxed scale-95 opacity-0 transition-all duration-1000 ease-out" id="chapter-title" style="font-family: 'Playfair Display', serif;">
                 "Yes, and you are<br>my favorite chapter. ❤️"
             </h1>
             
-            <!-- Side-by-side Button Layout with Dodge Logic -->
             <div class="flex flex-row items-center justify-center gap-8 pt-4 w-full relative min-h-[100px]" id="choice-buttons-box">
                 <button id="btn-aww" class="px-8 py-3 bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-500 hover:to-red-500 text-white font-semibold text-sm tracking-wide rounded-full shadow-lg hover:shadow-pink-600/30 transition-all duration-300 z-20">
                     Aww... let's see 🙈
@@ -215,7 +199,6 @@
         </div>
     </div>
 
-    <!-- STAGE 3 (Galaxy Physics Map) -->
     <div id="stage-3" class="absolute inset-0 z-20 hidden flex flex-col items-center justify-between bg-[#000000] select-none stage-transition">
         <div class="w-full text-center pt-16 z-20">
             <h2 class="text-white/80 tracking-[0.4em] uppercase text-xs font-semibold" style="font-family: 'Cinzel', serif; text-shadow: 0 0 10px rgba(255,255,255,0.3);">
@@ -232,27 +215,20 @@
         </div>
     </div>
 
-    <!-- STAGE 4 (Cinematic Ambient Ending Slide) -->
     <div id="stage-4" class="absolute inset-0 z-10 hidden flex flex-col items-center justify-start md:justify-center bg-[#020205] p-6 text-center stage-transition overflow-y-auto">
         <div class="space-y-12 z-10 max-w-lg my-auto relative">
             <div class="space-y-6 flex flex-col items-center">
-                <!-- High-contrast bright subtitles - Updated color to pink -->
                 <span class="text-xs md:text-sm tracking-[0.4em] text-pink-500 font-bold block" style="font-family: 'Cinzel', serif;">
                     AMONG COUNTLESS HEARTS
                 </span>
-
-                <!-- Highlighting "...I found home in you." with premium glows -->
                 <h1 class="text-4xl md:text-6xl font-normal text-white italic py-2 drop-shadow-[0_0_20px_rgba(244,63,94,0.65)]" style="font-family: 'Playfair Display', serif;">
                     "...I found home in you."
                 </h1>
-                
-                <!-- Highly visible clear typography header -->
                 <span class="text-xs md:text-sm tracking-[0.3em] text-white uppercase font-bold block" style="font-family: 'Cinzel', serif;">
                     Some souls are meant to meet.
                 </span>
             </div>
 
-            <!-- Glowing Airmail Envelope -->
             <div class="flex justify-center py-4">
                 <div class="airmail-border w-[280px] h-[180px] cursor-pointer hover:scale-105 transition-transform duration-300 active:scale-95 shadow-lg shadow-pink-500/10" id="envelope-wrapper">
                     <div class="envelope-body w-full h-full flex flex-col justify-center items-center text-zinc-800 p-4 space-y-2 bg-white">
@@ -274,18 +250,14 @@
         </div>
     </div>
 
-    <!-- EXQUISITE SCROLL-OPTIMIZED ROYAL LOVE LETTER MODAL -->
     <div id="letter-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/90 backdrop-blur-md opacity-0 transition-opacity duration-500">
         <div class="letter-modal w-full max-w-md p-8 md:p-10 rounded-2xl border border-pink-500/30 relative transform scale-90 opacity-0 transition-all duration-500 flex flex-col space-y-6 bg-zinc-950/90 shadow-2xl overflow-hidden">
-            <!-- Close Trigger -->
             <button id="modal-close" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-2 text-xl z-20">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <!-- Fully scrollable container with customized scroll styling to show all text -->
             <div class="overflow-y-auto pr-2 space-y-6 text-left select-text max-h-[50vh] scrollbar-thin scrollbar-thumb-pink-500">
                 <h3 class="text-3xl text-pink-500 font-bold tracking-wide" style="font-family: 'Caveat', cursive;">Dear Love,</h3>
-                
                 <p class="text-zinc-200 text-base md:text-lg leading-relaxed font-light tracking-wide space-y-4">
                     Before this journey ends, there's one thing I want you to remember...
                     <br><br>
@@ -302,7 +274,6 @@
                 </div>
             </div>
 
-            <!-- Footer section -->
             <div class="pt-6 border-t border-white/5 flex justify-between items-center relative z-10">
                 <button id="btn-replay" class="text-xs tracking-widest text-white/60 hover:text-pink-500 transition-colors uppercase font-bold flex items-center gap-2">
                     <i class="fa-solid fa-rotate-left"></i> Replay Journey
@@ -331,7 +302,6 @@
         const btnLater = document.getElementById('btn-later');
         const choiceBox = document.getElementById('choice-buttons-box');
 
-        // Robust Music Control
         function initAudio() {
             if (!audioStarted) {
                 bgMusic.volume = 0.8;
@@ -339,7 +309,7 @@
                     audioStarted = true;
                     updateMusicVisuals(true);
                 }).catch(err => {
-                    console.log("Browser playback interaction safeguard: Handled gracefully.");
+                    console.log("Browser playback interaction safeguard handled.");
                 });
             }
         }
@@ -362,11 +332,8 @@
 
         musicToggle.addEventListener('click', toggleMusic);
 
-        // Gateway Entry
         document.getElementById('btn-enter').addEventListener('click', () => {
             initAudio();
-            
-            // Phase Out Start Screen and transition to Story Stage
             startScreen.classList.add('opacity-0');
             setTimeout(() => {
                 startScreen.classList.add('hidden');
@@ -374,7 +341,6 @@
             }, 1000);
         });
 
-        // ABC Character-by-Character Animation Helper
         function animateABC(elementId, text, speed = 40, callback) {
             const container = document.getElementById(elementId);
             container.innerHTML = '';
@@ -396,13 +362,11 @@
             addLetter();
         }
 
-        // Stage 1 Sequence with typed lines and "but" explicitly positioned in-between
         function runStage1() {
             stage1.classList.remove('hidden');
             stage1.classList.add('flex');
             stage1.classList.remove('opacity-0');
             
-            // Clean dynamic sequential typewriter reveal
             animateABC('s1-part1', 'They say', 50, () => {
                 setTimeout(() => {
                     animateABC('s1-part2', 'love stories are written...', 45, () => {
@@ -422,16 +386,13 @@
             });
         }
 
-        // Trigger 'Really' -> Transitions to Favorite Chapter Frame
         document.getElementById('btn-really').addEventListener('click', () => {
             document.getElementById('story-text-frame').classList.add('opacity-0');
             setTimeout(() => {
                 document.getElementById('story-text-frame').classList.add('hidden');
-                
                 const chapFrame = document.getElementById('chapter-text-frame');
                 chapFrame.classList.remove('hidden');
                 chapFrame.classList.add('flex');
-                
                 resetLaterButton();
 
                 setTimeout(() => {
@@ -442,21 +403,12 @@
             }, 800);
         });
 
-        // Ultra-Smooth dodge mechanic for "Maybe Later" button
         function teleportButton() {
             const containerWidth = choiceBox.offsetWidth;
-            const btnWidth = btnLater.offsetWidth;
-            
             const currentLeft = btnLater.offsetLeft;
             const shiftAmount = 140; 
             
-            let targetX = 0;
-            if (currentLeft < containerWidth / 2) {
-                targetX = shiftAmount;
-            } else {
-                targetX = -shiftAmount;
-            }
-
+            let targetX = currentLeft < containerWidth / 2 ? shiftAmount : -shiftAmount;
             const targetY = (Math.random() > 0.5 ? -25 : 25);
             btnLater.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.95)`;
         }
@@ -471,7 +423,6 @@
             btnLater.style.transform = 'translate(0px, 0px) scale(1)';
         }
 
-        // Transition from Chapter choice to Galaxy Star Map Stage
         document.getElementById('btn-aww').addEventListener('click', () => {
             stage1.classList.add('opacity-0');
             setTimeout(() => {
@@ -481,7 +432,7 @@
             }, 1000);
         });
 
-        // STAGE 2: Interactive Galaxy Engine
+        // STAGE 3: Interactive Galaxy Engine
         let canvas, ctx;
         let youOrb, meOrb;
         let starfield = [], meTrail = [], heartParticles = [], explosionParticles = [];
@@ -497,7 +448,6 @@
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
 
-            // Populate Stars background
             starfield = [];
             for (let i = 0; i < 180; i++) {
                 starfield.push({
@@ -511,12 +461,15 @@
             }
 
             const centerY = canvas.height / 2;
-            youOrb = { x: canvas.width * 0.28, y: centerY, targetX: canvas.width * 0.28, targetY: centerY, radius: 28, color: '#ff007f', glowColor: 'rgba(255, 0, 127, 0.85)', label: 'YOU' };
-            meOrb = { x: canvas.width * 0.72, y: centerY, targetX: canvas.width * 0.72, targetY: centerY, radius: 28, color: '#ff3333', glowColor: 'rgba(255, 51, 51, 0.85)', label: 'ME' };
+            // Increased safe radius to 45 for responsive finger tap space on mobiles
+            youOrb = { x: canvas.width * 0.25, y: centerY, targetX: canvas.width * 0.25, targetY: centerY, radius: 28, color: '#ff007f', glowColor: 'rgba(255, 0, 127, 0.85)', label: 'YOU' };
+            meOrb = { x: canvas.width * 0.75, y: centerY, targetX: canvas.width * 0.75, targetY: centerY, radius: 28, color: '#ff3333', glowColor: 'rgba(255, 51, 51, 0.85)', label: 'ME' };
 
             canvas.addEventListener('mousedown', handleStart);
             canvas.addEventListener('mousemove', handleMove);
             canvas.addEventListener('mouseup', handleEnd);
+            
+            // Standard touch events with active passive tracking overrides
             canvas.addEventListener('touchstart', handleStart, { passive: false });
             canvas.addEventListener('touchmove', handleMove, { passive: false });
             canvas.addEventListener('touchend', handleEnd, { passive: false });
@@ -534,48 +487,57 @@
             }
         }
 
+        // Exact accurate cross-device client touch translation logic 
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
             if (e.touches && e.touches.length > 0) {
-                return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+                return { 
+                    x: e.touches[0].clientX - rect.left, 
+                    y: e.touches[0].clientY - rect.top 
+                };
             }
             return { x: e.clientX - rect.left, y: e.clientY - rect.top };
         }
 
         function handleStart(e) {
             if (isFusing) return;
-            if (e.type === 'touchstart') e.preventDefault();
+            if (e.cancelable) e.preventDefault(); // Safe check to completely lock screen pull downs
             const pos = getPos(e);
-            if (Math.hypot(pos.x - youOrb.x, pos.y - youOrb.y) < 65) dragTarget = 'you';
-            else if (Math.hypot(pos.x - meOrb.x, pos.y - meOrb.y) < 65) dragTarget = 'me';
+            
+            // Dynamic touch radius padding to support mobile taps perfectly
+            if (Math.hypot(pos.x - youOrb.x, pos.y - youOrb.y) < 70) dragTarget = 'you';
+            else if (Math.hypot(pos.x - meOrb.x, pos.y - meOrb.y) < 70) dragTarget = 'me';
         }
 
         function handleMove(e) {
             if (!dragTarget || isFusing) return;
-            if (e.type === 'touchmove') e.preventDefault();
+            if (e.cancelable) e.preventDefault(); // Block scroll behavior entirely during touch movement
+            
             const pos = getPos(e);
-            const margin = 30;
+            const margin = 20;
             const bX = Math.max(margin, Math.min(canvas.width - margin, pos.x));
             const bY = Math.max(margin, Math.min(canvas.height - margin, pos.y));
+            
             if (dragTarget === 'you') { youOrb.targetX = bX; youOrb.targetY = bY; }
             else if (dragTarget === 'me') { meOrb.targetX = bX; meOrb.targetY = bY; }
         }
 
-        function handleEnd() { dragTarget = null; }
+        function handleEnd(e) { 
+            dragTarget = null; 
+        }
 
         function gameLoop() {
             if (!canvas) return;
             ctx.fillStyle = '#020205';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Twinkling Starfield
             starfield.forEach(star => {
                 star.phase += star.twinkleSpeed;
                 ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity * (0.2 + 0.8 * Math.sin(star.phase))})`;
                 ctx.beginPath(); ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2); ctx.fill();
             });
 
-            const lerpSpeed = 0.15;
+            const lerpSpeed = 0.2;
             youOrb.x += (youOrb.targetX - youOrb.x) * lerpSpeed;
             youOrb.y += (youOrb.targetY - youOrb.y) * lerpSpeed;
             meOrb.x += (meOrb.targetX - meOrb.x) * lerpSpeed;
@@ -586,7 +548,6 @@
                 if (meTrail.length > 30) meTrail.shift();
             }
 
-            // Draw ME Trail
             ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             for (let i = 0; i < meTrail.length; i++) {
@@ -596,24 +557,22 @@
 
             const currentDist = Math.hypot(youOrb.x - meOrb.x, youOrb.y - meOrb.y);
             
-            if (currentDist < 50 && !isFusing) {
+            // Safe range of 55 pixels distance to trigger meet on small mobile views seamlessly
+            if (currentDist < 55 && !isFusing) {
                 isFusing = true; dragTarget = null;
                 triggerFusionExplosion();
             }
 
             const midX = (youOrb.x + meOrb.x) / 2, midY = (youOrb.y + meOrb.y) / 2;
-            if (currentDist < 450 && !isFusing && Math.random() < 0.5) {
-                const t = Math.random() * Math.PI * 2;
-                const hX = 16 * Math.pow(Math.sin(t), 3);
-                const hY = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                const sz = 3.0 + (((450 - currentDist) / 450) * 5.5);
+
+            if (!isFusing && Math.random() < 0.08) {
                 heartParticles.push({
-                    x: midX + hX * sz,
-                    y: midY + hY * sz,
-                    color: Math.random() > 0.5 ? '#ff007f' : '#ff3333',
-                    alpha: 1,
-                    size: 1 + Math.random() * 2,
-                    decay: 0.015
+                    x: midX + (Math.random() - 0.5) * currentDist * 0.7,
+                    y: midY + (Math.random() - 0.5) * 40,
+                    size: 2 + Math.random() * 4,
+                    color: Math.random() > 0.5 ? 'rgba(255, 0, 127, 0.4)' : 'rgba(255, 51, 51, 0.4)',
+                    alpha: 0.7,
+                    decay: 0.01 + Math.random() * 0.01
                 });
             }
 
@@ -668,20 +627,26 @@
 
         function triggerFusionExplosion() {
             const midX = (youOrb.x + meOrb.x) / 2, midY = (youOrb.y + meOrb.y) / 2;
-            for (let i = 0; i < 220; i++) {
-                const angle = Math.random() * Math.PI * 2, speed = 1.5 + Math.random() * 9.5;
+            
+            for (let i = 0; i < 350; i++) {
+                const angle = (i / 350) * Math.PI * 2;
+                const hx = 16 * Math.pow(Math.sin(angle), 3);
+                const hy = -(13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle));
+                
+                const baseSpeed = 1.0 + Math.random() * 4.0;
                 explosionParticles.push({
                     x: midX,
                     y: midY,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
+                    vx: hx * 0.35 * baseSpeed, 
+                    vy: hy * 0.35 * baseSpeed,
                     color: Math.random() > 0.5 ? '#ff007f' : '#ff3333',
                     alpha: 1,
-                    size: 3 + Math.random() * 8,
-                    shape: Math.random() > 0.45 ? 'heart' : 'circle',
-                    decay: 0.005 + Math.random() * 0.01
+                    size: 5 + Math.random() * 8, 
+                    shape: Math.random() > 0.3 ? 'heart' : 'circle',
+                    decay: 0.005 + Math.random() * 0.006
                 });
             }
+
             document.getElementById('stage3-instruction').classList.add('opacity-0');
             setTimeout(() => {
                 stage3.classList.add('opacity-0');
@@ -702,7 +667,6 @@
             context.fillStyle = grad; context.beginPath(); context.arc(midX, midY, radius, 0, Math.PI * 2); context.fill(); context.restore(); context.globalAlpha = 1.0;
         }
 
-        // STAGE 4: Letter Unfold Trigger
         function runStage4() {
             stage4.classList.remove('hidden'); stage4.classList.add('flex');
             envelopeWrapper.addEventListener('click', () => {
@@ -719,7 +683,6 @@
             });
         }
 
-        // Close Modal Controls
         document.getElementById('modal-close').addEventListener('click', () => {
             const card = letterModal.querySelector('.letter-modal');
             card.classList.replace('scale-100', 'scale-90'); card.classList.replace('opacity-100', 'opacity-0');
@@ -727,7 +690,6 @@
             setTimeout(() => { letterModal.classList.remove('flex'); letterModal.classList.add('hidden'); }, 500);
         });
 
-        // Replay Journey reset mechanics
         document.getElementById('btn-replay').addEventListener('click', () => {
             const card = letterModal.querySelector('.letter-modal');
             card.classList.replace('scale-100', 'scale-90'); card.classList.replace('opacity-100', 'opacity-0');
@@ -750,7 +712,6 @@
                     document.getElementById('chapter-text-frame').classList.add('hidden');
                     document.getElementById('chapter-title').classList.add('scale-95', 'opacity-0');
                     
-                    // Clear previous typed letter spans before restarting
                     document.getElementById('s1-part1').innerHTML = '';
                     document.getElementById('s1-part2').innerHTML = '';
                     document.getElementById('s1-part-but').innerHTML = '';
