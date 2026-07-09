@@ -288,7 +288,7 @@
             </button>
 
             <!-- Fully scrollable container with customized scroll styling to show all text -->
-            <div class="overflow-y-auto pr-2 space-y-6 text-left select-text max-h-[50vh] scrollbar-thin scrollbar-thumb-pink-500">
+            <div class="overflow-y-auto pr-2 space-y-6 text-left select-text max-h-[50vh] scrollbar-thin scrollbar-thumb-pink-500" style="touch-action: pan-y !important; -webkit-overflow-scrolling: touch !important;">
                 <h3 class="text-3xl text-pink-500 font-bold tracking-wide" style="font-family: 'Caveat', cursive;">Dear Love,</h3>
                 
                 <p class="text-zinc-200 text-base md:text-lg leading-relaxed font-light tracking-wide space-y-4">
@@ -606,8 +606,8 @@
         }
 
         function handleMove(e) {
-            // Unconditionally prevent default on mobile touch-move to lock window bouncing and scrolling completely
-            if (e.type === 'touchmove' && e.cancelable) e.preventDefault();
+            // Prevent default touch actions only when actively dragging to preserve modal scrolling
+            if (dragTarget && e.type === 'touchmove' && e.cancelable) e.preventDefault();
             if (!dragTarget || isFusing) return;
             const pos = getPos(e);
             const margin = 30;
